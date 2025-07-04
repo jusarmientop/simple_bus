@@ -55,9 +55,9 @@ SC_MODULE(simple_bus_test)
 
   // module instances
   simple_bus_master_blocking     *master_b;
-  simple_bus_master_non_blocking *master_nb;
+  //simple_bus_master_non_blocking *master_nb;
   //simple_bus_master_direct       *master_d;
-  simple_bus_slow_mem            *mem_slow;
+  //simple_bus_slow_mem            *mem_slow;
   simple_bus                     *bus;
   simple_bus_fast_mem            *mem_fast;
   simple_bus_arbiter             *arbiter;
@@ -68,10 +68,10 @@ SC_MODULE(simple_bus_test)
   {
     // create instances
     master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false, 300);
-    master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 20);
+    //master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 20);
     //master_d = new simple_bus_master_direct("master_d", 0x78, 100);
-    mem_fast = new simple_bus_fast_mem("mem_fast", 0x80, 0x7f);
-    mem_slow = new simple_bus_slow_mem("mem_slow", 0x00, 0xff, 1);
+    mem_fast = new simple_bus_fast_mem("mem_fast", 0x00, 0x7f);
+    //mem_slow = new simple_bus_slow_mem("mem_slow", 0x80, 0xff, 1);
     bus = new simple_bus("bus",true); // verbose output
     //bus = new simple_bus("bus");
     //arbiter = new simple_bus_arbiter("arbiter",true); // verbose output
@@ -81,13 +81,13 @@ SC_MODULE(simple_bus_test)
     //master_d->clock(C1);
     bus->clock(C1);
     master_b->clock(C1);
-    master_nb->clock(C1);
-    mem_slow->clock(C1);
+    //master_nb->clock(C1);
+    //mem_slow->clock(C1);
     //master_d->bus_port(*bus);
     master_b->bus_port(*bus);
-    master_nb->bus_port(*bus);
+    //master_nb->bus_port(*bus);
     bus->arbiter_port(*arbiter);
-    bus->slave_port(*mem_slow);
+    //bus->slave_port(*mem_slow);
     bus->slave_port(*mem_fast);
   }
 
@@ -95,9 +95,9 @@ SC_MODULE(simple_bus_test)
   ~simple_bus_test()
   {
     if (master_b) {delete master_b; master_b = 0;}
-    if (master_nb) {delete master_nb; master_nb = 0;}
+    //if (master_nb) {delete master_nb; master_nb = 0;}
     //if (master_d) {delete master_d; master_d = 0;}
-    if (mem_slow) {delete mem_slow; mem_slow = 0;}
+    //if (mem_slow) {delete mem_slow; mem_slow = 0;}
     if (bus) {delete bus; bus = 0;}
     if (mem_fast) {delete mem_fast; mem_fast = 0;}
     if (arbiter) {delete arbiter; arbiter = 0;}
