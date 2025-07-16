@@ -100,6 +100,11 @@ void simple_bus::end_of_elaboration()
 
 void simple_bus::main_action()
 {
+  if (logger) {
+    logger->log("main_action ejecutado en ciclo " + std::to_string(sc_time_stamp().value()));
+  }
+
+
   // m_current_request is cleared after the slave is done with a
   // single data transfer. Burst requests require the arbiter to
   // select the request again.

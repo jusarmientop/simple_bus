@@ -61,6 +61,8 @@ add_executable (simple_bus simple_bus_main.cpp
                            simple_bus_arbiter_if.h
                            simple_bus_arbiter.cpp
                            simple_bus_types.cpp
-                           simple_bus_tools.cpp)
+                           simple_bus_tools.cpp
+                           logger.cpp
+                           logger.h)
 target_link_libraries (simple_bus SystemC::systemc)
 configure_and_add_test (simple_bus)

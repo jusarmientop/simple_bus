@@ -53,6 +53,7 @@
 #include "simple_bus_blocking_if.h"
 #include "simple_bus_arbiter_if.h"
 #include "simple_bus_slave_if.h"
+#include "logger.h"
 
 
 class simple_bus
@@ -63,6 +64,7 @@ class simple_bus
 {
 public:
   // ports
+  
   sc_in_clk clock;
   sc_port<simple_bus_arbiter_if> arbiter_port;
   sc_port<simple_bus_slave_if, 0> slave_port;
@@ -81,6 +83,8 @@ public:
     dont_initialize();
     sensitive << clock.neg();
   }
+  
+  void set_logger(Logger* l) { logger = l; }
 
   // process
   void main_action();
@@ -124,6 +128,7 @@ private:
   bool m_verbose;
   simple_bus_request_vec m_requests;
   simple_bus_request *m_current_request;
+  Logger* logger = nullptr;
 
 }; // end class simple_bus
 

@@ -47,6 +47,8 @@
 #include "simple_bus.h"
 #include "simple_bus_fast_mem.h"
 #include "simple_bus_arbiter.h"
+#include "logger.h"
+
 
 SC_MODULE(simple_bus_test)
 {
@@ -61,11 +63,17 @@ SC_MODULE(simple_bus_test)
   simple_bus                     *bus;
   simple_bus_fast_mem            *mem_fast;
   simple_bus_arbiter             *arbiter;
+  Logger* logger;
+
 
   // constructor
   SC_CTOR(simple_bus_test)
     : C1("C1")
   {
+    // Instanciar el logger y abrir el archivo automáticamente
+    logger = new Logger("logger");
+    logger->open_next("ejecuciones", "bus_log_");
+
     // create instances
     master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false, 300);
     //master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 20);
@@ -89,6 +97,7 @@ SC_MODULE(simple_bus_test)
     bus->arbiter_port(*arbiter);
     //bus->slave_port(*mem_slow);
     bus->slave_port(*mem_fast);
+    bus->set_logger(logger);
   }
 
   // destructor
