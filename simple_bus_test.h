@@ -57,7 +57,7 @@ SC_MODULE(simple_bus_test)
 
   // module instances
   simple_bus_master_blocking     *master_b;
-  //simple_bus_master_non_blocking *master_nb;
+  simple_bus_master_non_blocking *master_nb;
   //simple_bus_master_direct       *master_d;
   //simple_bus_slow_mem            *mem_slow;
   simple_bus                     *bus;
@@ -75,10 +75,10 @@ SC_MODULE(simple_bus_test)
     logger->open_next("ejecuciones", "bus_log_");
 
     // create instances
-    master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false, 300);
-    //master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 20);
+    master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false,16);
+    master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 2);
     //master_d = new simple_bus_master_direct("master_d", 0x78, 100);
-    mem_fast = new simple_bus_fast_mem("mem_fast", 0x00, 0x7f);
+    mem_fast = new simple_bus_fast_mem("mem_fast", 0x00, 0xff);
     //mem_slow = new simple_bus_slow_mem("mem_slow", 0x80, 0xff, 1);
     bus = new simple_bus("bus",true); // verbose output
     //bus = new simple_bus("bus");
@@ -89,11 +89,11 @@ SC_MODULE(simple_bus_test)
     //master_d->clock(C1);
     bus->clock(C1);
     master_b->clock(C1);
-    //master_nb->clock(C1);
+    master_nb->clock(C1);
     //mem_slow->clock(C1);
     //master_d->bus_port(*bus);
     master_b->bus_port(*bus);
-    //master_nb->bus_port(*bus);
+    master_nb->bus_port(*bus);
     bus->arbiter_port(*arbiter);
     //bus->slave_port(*mem_slow);
     bus->slave_port(*mem_fast);
@@ -104,7 +104,7 @@ SC_MODULE(simple_bus_test)
   ~simple_bus_test()
   {
     if (master_b) {delete master_b; master_b = 0;}
-    //if (master_nb) {delete master_nb; master_nb = 0;}
+    if (master_nb) {delete master_nb; master_nb = 0;}
     //if (master_d) {delete master_d; master_d = 0;}
     //if (mem_slow) {delete mem_slow; mem_slow = 0;}
     if (bus) {delete bus; bus = 0;}

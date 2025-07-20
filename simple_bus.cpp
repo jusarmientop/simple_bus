@@ -100,26 +100,43 @@ void simple_bus::end_of_elaboration()
 
 void simple_bus::main_action()
 {
-
-
-
   // m_current_request is cleared after the slave is done with a
   // single data transfer. Burst requests require the arbiter to
   // select the request again.
 
-  if (!m_current_request){
+  if (!m_current_request) {
     m_current_request = get_next_request();
-    if (!m_current_request){
-    if (logger) {
-        logger->log(std::to_string(sc_time_stamp().value()) + ",idle,-,-,-,-,-,-");
-      }return;}}
-  else
+
+    if (!m_current_request) {
+      // Ciclo de inactividad (idle)
+      if (logger) {
+        logger->log(std::to_string(sc_time_stamp().value()) + ",idle,-,-,-,-,-");
+      }
+      return;
+    }
+  } else {
     // monitor slave wait states
     if (m_verbose)
       sb_fprintf(stdout, "%s SLV [%d]\n", sc_time_stamp().to_string().c_str(),
-		 m_current_request->address);
-  if (m_current_request)
-    handle_request();
+                 m_current_request->address);
+  }
+
+  // Si hay transacción activa
+  if (logger && m_current_request) {
+    std::string tipo = m_current_request->do_write ? "WRITE" : "READ";
+    logger->log(
+      std::to_string(sc_time_stamp().value()) + "," +
+      tipo + "," +
+      std::to_string(m_current_request->priority) + "," +
+      std::to_string(m_current_request->address) + "," +
+      std::to_string(*(m_current_request->data)) + "," +
+      (m_current_request->lock ? "true" : "false") + "," +
+      "ACTIVE"
+    );
+  }
+
+  handle_request();
+
   if (!m_current_request)
     clear_locks();
 }
