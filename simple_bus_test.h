@@ -72,7 +72,7 @@ SC_MODULE(simple_bus_test)
     // Logger
     logger = new Logger("logger");
     logger->open_next("ejecuciones", "bus_log_");
-    logger->log("#Nombre,Prioridad");
+    logger->log("#Nombre,Prioridad,direccion,lock,descanso");
 
     // Bus y árbitro
     bus = new simple_bus("bus", true);

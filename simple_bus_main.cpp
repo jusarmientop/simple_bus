@@ -78,7 +78,7 @@ int sc_main(int argc, char* argv[])
 
   simple_bus_test tb("tb", config_b, config_nb);
 
-  sc_core::sc_start(3000, sc_core::SC_NS);
+  sc_core::sc_start(30000, sc_core::SC_NS);
 
   return 0;
 }
