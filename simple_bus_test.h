@@ -34,89 +34,100 @@
   Description of Modification:
 
  *****************************************************************************/
-
 #ifndef __simple_bus_test_h
 #define __simple_bus_test_h
 
 #include <systemc.h>
+#include <vector>
+#include <tuple>
+#include <string>
 
 #include "simple_bus_master_blocking.h"
 #include "simple_bus_master_non_blocking.h"
-#include "simple_bus_master_direct.h"
-#include "simple_bus_slow_mem.h"
-#include "simple_bus.h"
 #include "simple_bus_fast_mem.h"
+#include "simple_bus.h"
 #include "simple_bus_arbiter.h"
 #include "logger.h"
 
-
 SC_MODULE(simple_bus_test)
 {
-  // channels
+  // clock
   sc_clock C1;
 
-  // module instances
-  simple_bus_master_blocking     *master_b;
-  simple_bus_master_non_blocking *master_nb;
-  //simple_bus_master_direct       *master_d;
-  //simple_bus_slow_mem            *mem_slow;
-  simple_bus                     *bus;
-  simple_bus_fast_mem            *mem_fast;
-  simple_bus_arbiter             *arbiter;
+  // Módulos
+  std::vector<simple_bus_master_blocking*> masters_b;
+  std::vector<simple_bus_master_non_blocking*> masters_nb;
+  simple_bus_fast_mem *mem_fast1;
+  simple_bus_fast_mem *mem_fast2;
+  simple_bus *bus;
+  simple_bus_arbiter *arbiter;
   Logger* logger;
 
-  
-  // constructor
-  SC_CTOR(simple_bus_test)
-    : C1("C1")
+  // Constructor parametrizado
+  simple_bus_test(sc_module_name name,
+                  std::vector<std::tuple<int, unsigned int, bool, unsigned int>> config_b,
+                  std::vector<std::tuple<int, unsigned int, bool, unsigned int>> config_nb)
+    : sc_module(name), C1("C1", 10, SC_NS)
   {
-    // Instanciar el logger y abrir el archivo automáticamente
+    // Logger
     logger = new Logger("logger");
     logger->open_next("ejecuciones", "bus_log_");
-
-        // Registrar nombres y prioridades de los masters
     logger->log("#Nombre,Prioridad");
-    logger->log("master_b,2");
-    logger->log("master_nb,1");
 
-    // create instances
-    master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false,16);
-    master_nb = new simple_bus_master_non_blocking("master_nb", 1, 0x40, false, 2);
-    //master_d = new simple_bus_master_direct("master_d", 0x78, 100);
-    mem_fast = new simple_bus_fast_mem("mem_fast", 0x00, 0xff);
-    //mem_slow = new simple_bus_slow_mem("mem_slow", 0x80, 0xff, 1);
-    bus = new simple_bus("bus",true); // verbose output
-    //bus = new simple_bus("bus");
-    //arbiter = new simple_bus_arbiter("arbiter",true); // verbose output
+    // Bus y árbitro
+    bus = new simple_bus("bus", true);
     arbiter = new simple_bus_arbiter("arbiter");
 
-    // connect instances
-    //master_d->clock(C1);
+    // Memorias
+    mem_fast1 = new simple_bus_fast_mem("mem_fast1", 0x000, 0x3FF);  // 64 bytes
+    mem_fast2 = new simple_bus_fast_mem("mem_fast2", 0x400, 0x7FF);  // otros 64 bytes
+
+    // Conexiones de reloj
     bus->clock(C1);
-    master_b->clock(C1);
-    master_nb->clock(C1);
-    //mem_slow->clock(C1);
-    //master_d->bus_port(*bus);
-    master_b->bus_port(*bus);
-    master_nb->bus_port(*bus);
+
+    // Crear masters bloqueantes
+    for (size_t i = 0; i < config_b.size(); ++i) {
+      auto [prioridad, addr, lock, count] = config_b[i];
+      std::string name = "master_b_" + std::to_string(i);
+      auto* m = new simple_bus_master_blocking(name.c_str(), prioridad, addr, lock, count);
+      m->clock(C1);
+      m->bus_port(*bus);
+      masters_b.push_back(m);
+
+      logger->log(name + "," + std::to_string(prioridad)+
+      "," + std::to_string(addr)+"," + std::to_string(lock)+"," + std::to_string(count));
+    }
+
+    // Crear masters no bloqueantes
+    for (size_t i = 0; i < config_nb.size(); ++i) {
+      auto [prioridad, addr, lock, count] = config_nb[i];
+      std::string name = "master_nb_" + std::to_string(i);
+      auto* m = new simple_bus_master_non_blocking(name.c_str(), prioridad, addr, lock, count);
+      m->clock(C1);
+      m->bus_port(*bus);
+      masters_nb.push_back(m);
+
+      logger->log(name + "," + std::to_string(prioridad)+
+      "," + std::to_string(addr)+"," + std::to_string(lock)+"," + std::to_string(count));
+    }
+
+    // Conexiones
+    bus->slave_port(*mem_fast1);
+    bus->slave_port(*mem_fast2);
     bus->arbiter_port(*arbiter);
-    //bus->slave_port(*mem_slow);
-    bus->slave_port(*mem_fast);
     bus->set_logger(logger);
   }
 
-  // destructor
+  // Destructor
   ~simple_bus_test()
   {
-    if (master_b) {delete master_b; master_b = 0;}
-    if (master_nb) {delete master_nb; master_nb = 0;}
-    //if (master_d) {delete master_d; master_d = 0;}
-    //if (mem_slow) {delete mem_slow; mem_slow = 0;}
-    if (bus) {delete bus; bus = 0;}
-    if (mem_fast) {delete mem_fast; mem_fast = 0;}
-    if (arbiter) {delete arbiter; arbiter = 0;}
+    for (auto* m : masters_b) delete m;
+    for (auto* m : masters_nb) delete m;
+    if (mem_fast1) delete mem_fast1;
+    if (mem_fast2) delete mem_fast2;
+    if (bus) delete bus;
+    if (arbiter) delete arbiter;
   }
-
-}; // end class simple_bus_test
+};
 
 #endif
