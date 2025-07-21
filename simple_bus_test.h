@@ -65,7 +65,7 @@ SC_MODULE(simple_bus_test)
   simple_bus_arbiter             *arbiter;
   Logger* logger;
 
-
+  
   // constructor
   SC_CTOR(simple_bus_test)
     : C1("C1")
@@ -73,6 +73,11 @@ SC_MODULE(simple_bus_test)
     // Instanciar el logger y abrir el archivo automáticamente
     logger = new Logger("logger");
     logger->open_next("ejecuciones", "bus_log_");
+
+        // Registrar nombres y prioridades de los masters
+    logger->log("#Nombre,Prioridad");
+    logger->log("master_b,2");
+    logger->log("master_nb,1");
 
     // create instances
     master_b = new simple_bus_master_blocking("master_b", 2, 0x00, false,16);
