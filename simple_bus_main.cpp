@@ -56,7 +56,7 @@ int sc_main(int argc, char* argv[])
 
 
   auto random_size = []() {
-    int sizes[] = {2, 4, 8, 16};
+    int sizes[] = { 4, 8, 16, 32, 64, 128, 256, 512};
     return sizes[std::rand() % 4];
   };
 

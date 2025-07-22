@@ -110,7 +110,7 @@ SC_MODULE(simple_bus_test)
       logger->log(name + "," + std::to_string(prioridad)+
       "," + std::to_string(addr)+"," + std::to_string(lock)+"," + std::to_string(count));
     }
-
+    logger->log("Tiempo,instruccion,Master,direccion,dato,lock,uso");
     // Conexiones
     bus->slave_port(*mem_fast1);
     bus->slave_port(*mem_fast2);
